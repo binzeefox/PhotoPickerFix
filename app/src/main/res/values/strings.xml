@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PhotoPickerFix</string>
+    <string name="image_picker_camera_btn">拍照</string>
+    <string name="image_picker_album_btn">相册</string>
+</resources>
