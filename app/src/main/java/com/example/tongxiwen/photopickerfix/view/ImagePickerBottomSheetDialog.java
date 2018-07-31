@@ -2,6 +2,7 @@ package com.example.tongxiwen.photopickerfix.view;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
@@ -12,6 +13,9 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.example.tongxiwen.photopickerfix.R;
 import com.example.tongxiwen.photopickerfix.util.FileUtil;
@@ -24,12 +28,17 @@ public class ImagePickerBottomSheetDialog extends BottomSheetDialog implements V
     public static final int REQUEST_ALBUM = 0x01;
     public static final int REQUEST_CROP = 0x02;
 
+    /**
+     * 需要在manifest内配置fileProvider
+     */
     private static final String AUTHORITY
             = "com.example.tongxiwen.photopickerfix.PROVIDER";
 
     private Activity mContext;
     private String tempPath;
     private File tempFile;
+    private Button buttonCamera;
+    private Button buttonAlbum;
 
     private boolean isNougat;   // 是否为7.0
 
@@ -63,10 +72,7 @@ public class ImagePickerBottomSheetDialog extends BottomSheetDialog implements V
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.image_picker_bottom_sheet_dialog_layout);
-
-        findViewById(R.id.camera_btn).setOnClickListener(this);
-        findViewById(R.id.album_btn).setOnClickListener(this);
+        setContentView(getContentView());
     }
 
 //                       ↓公共方法
@@ -190,18 +196,48 @@ public class ImagePickerBottomSheetDialog extends BottomSheetDialog implements V
         mContext.startActivityForResult(intent, REQUEST_CROP);
     }
 
+    /**
+     * 获取视图（节省布局文件，方便移植）
+     */
+    private View getContentView() {
+        float density = Resources.getSystem().getDisplayMetrics().density;
+        LinearLayout container = new LinearLayout(getContext());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams
+                (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        container.setLayoutParams(params);
+        container.setPadding(0, (int) density * 16
+                , 0, (int) density * 16);
+        container.setOrientation(LinearLayout.VERTICAL);
+
+        buttonCamera = new Button(getContext());
+        buttonAlbum = new Button(getContext());
+
+        LinearLayout.LayoutParams buttonParams = new LinearLayout.LayoutParams
+                (ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        buttonCamera.setText("相机");
+        buttonCamera.setBackgroundColor(0xfff);
+        buttonCamera.setLayoutParams(buttonParams);
+        buttonAlbum.setText("相册");
+        buttonAlbum.setBackgroundColor(0xfff);
+        buttonAlbum.setLayoutParams(buttonParams);
+
+        buttonCamera.setOnClickListener(this);
+        buttonAlbum.setOnClickListener(this);
+
+        container.addView(buttonCamera);
+        container.addView(buttonAlbum);
+        return container;
+    }
+
+    /**
+     * 点击事件
+     */
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.camera_btn:
-                //开启相机
-                openCamera();
-                break;
-            case R.id.album_btn:
-                //开启相册
-                openAlbum();
-                break;
-        }
+        if (view == buttonCamera)
+            openCamera();
+        else if (view == buttonAlbum)
+            openAlbum();
         dismiss();
     }
 }
